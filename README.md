@@ -1,12 +1,17 @@
-# Chrome QR Scanner Pro
-
+# 小猫抓二维码
+全AI写的，我只写了提示词。
 这是一个离线优先的 Chrome 扩展，用于在任意网页中快速识别二维码（图片、截图或上传图片），结果在官方侧边栏展示、支持历史记录与快捷方式。
 
 ## 核心功能
 
 - **右键图片识别**：在任意图片上右键选择「Scan QR code from image」，会自动打开侧边栏并解析本地图片，避免重复下载或依赖远程服务。
+- <img width="1254" height="784" alt="image" src="https://github.com/user-attachments/assets/d610db70-bbba-4ab0-82af-c0367881fde9" />
+
 - **截图识别**：通过扩展图标或快捷键（默认 `Ctrl+Shift+Q`）触发展示截图工具，手动拖选二维码区域后立即识别，未操作或超时 15 秒自动关闭。
+- <img width="996" height="579" alt="image" src="https://github.com/user-attachments/assets/e167bc2d-802d-4c54-8fa0-7f5484fcb4b2" />
+
 - **本地上传识别**：扩展弹窗和侧边栏都提供上传入口，支持 JPG/PNG/WebP/WEBP，本地 `jsQR`（bundle）可离线解码多个二维码，并在结果中依次列出。
+- 
 - **Side Panel 结果展示**：扫码结果直接在 Chrome 侧边栏展示，支持展示当前截图/右键图片的预览图，识别失败或找不到二维码时显示红色提示并保留图像；如果识别内容为网址，会以可点击链接形式打开新标签。
 - **历史记录与清除**：所有成功的识别都会写入 `chrome.storage.local`，侧边栏可随时查看历史、按按钮清空；在弹出窗口也能快速浏览历史并直接点击链接。
 - **状态提示 & 进度反馈**：侧边栏状态芯片会体现「识别中 / 成功 / 错误 / 取消」等状态，帮助用户确认当前流水线是否可用。
@@ -38,3 +43,4 @@
 - 如需更快捷的唤起，可在 Chrome 快捷键设置中修改 `capture-qr` 的键位。  
 
 欢迎在本地继续定制样式、国际化文本或增加支持其他二维码格式的逻辑。
+我让ai 抄了https://github.com/yang-shuohao/QR-Scanner/tree/master/assets 有需要的可以去学习一下。
