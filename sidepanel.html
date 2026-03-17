@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>QR Scanner Pro 侧边栏</title>
+    <style>
+      :root {
+        font-family: "Segoe UI", "PingFang SC", system-ui, sans-serif;
+        color: #0f172a;
+        background: #f8fafc;
+      }
+
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #f8fafc;
+      }
+
+      h3 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+
+      .primary-btn,
+      .ghost-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .primary-btn {
+        background: #0f62fe;
+        color: #fff;
+        box-shadow: 0 10px 20px rgba(15, 98, 254, 0.35);
+      }
+
+      .primary-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .ghost-btn {
+        background: #eef2ff;
+        color: #0f62fe;
+      }
+
+      .ghost-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        margin-bottom: 12px;
+      }
+
+      .status-chip[data-state="loading"] {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+
+      .status-chip[data-state="success"] {
+        background: #dcfce7;
+        color: #15803d;
+      }
+
+      .status-chip[data-state="error"] {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .preview {
+        background: #fff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 14px;
+        padding: 10px;
+        margin-bottom: 12px;
+      }
+
+      .preview.hidden {
+        display: none;
+      }
+
+      .preview[data-state="error"] {
+        border-color: rgba(239, 68, 68, 0.4);
+        background: #fff5f5;
+      }
+
+      .preview-label {
+        font-size: 12px;
+        color: #475569;
+        margin-bottom: 6px;
+      }
+
+      #preview-img {
+        width: 100%;
+        max-height: 200px;
+        border-radius: 10px;
+        object-fit: contain;
+        display: block;
+      }
+
+      #result {
+        margin-bottom: 16px;
+      }
+
+      .result-card {
+        background: #fff;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        font-size: 13px;
+        word-break: break-word;
+        margin-bottom: 8px;
+      }
+
+      .result-card.error {
+        background: #fee2e2;
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #b91c1c;
+      }
+
+      .history-heading {
+        font-size: 14px;
+        margin: 0 0 8px;
+        font-weight: 600;
+      }
+
+      .history-item {
+        background: #fff;
+        border-radius: 10px;
+        padding: 10px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        margin-bottom: 6px;
+        font-size: 13px;
+        word-break: break-word;
+      }
+
+      .history-item small {
+        display: block;
+        margin-top: 4px;
+        color: #5b5b5b;
+      }
+
+      .clear-btn {
+        margin-top: 8px;
+        font-size: 12px;
+        border: none;
+        background: transparent;
+        color: #475569;
+        cursor: pointer;
+        text-decoration: underline;
+        padding: 0;
+      }
+
+      .history-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>二维码识别</h3>
+
+    <div class="button-row">
+      <button id="screenshot-btn" class="primary-btn">截图识别</button>
+      <button id="upload-btn" class="ghost-btn">上传图片</button>
+    </div>
+
+    <input type="file" id="file-input" accept="image/*" hidden />
+
+    <span id="status-chip" class="status-chip" data-state="idle">等待操作</span>
+
+    <div id="result"></div>
+
+    <div id="preview-container" class="preview hidden" data-state="idle">
+      <div class="preview-label">当前图像</div>
+      <img id="preview-img" alt="识别图像预览" />
+    </div>
+
+    <div class="history-actions">
+      <span class="history-heading">识别历史</span>
+      <button id="clear-history" class="clear-btn">清除记录</button>
+    </div>
+
+    <div id="history"></div>
+
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>
