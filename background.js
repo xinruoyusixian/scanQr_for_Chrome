@@ -6,14 +6,14 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== "scan-qr" || !tab?.id) {
     return;
   }
 
   console.log("Background: context menu scan requested", info.srcUrl, "tab", tab.id);
-  openSidePanel(tab.id);
-  safeSendMessage(tab.id, {
+  await openSidePanel(tab.id);
+  await safeSendMessage(tab.id, {
     type: "SCAN_IMAGE",
     url: info.srcUrl
   });
@@ -34,8 +34,8 @@ chrome.commands.onCommand.addListener(async (command) => {
   }
 
   console.log("Background: shortcut scan requested", tab.id);
-  openSidePanel(tab.id);
-  safeSendMessage(tab.id, { type: "START_SCREENSHOT_SELECTION" });
+  await openSidePanel(tab.id);
+  await safeSendMessage(tab.id, { type: "START_SCREENSHOT_SELECTION" });
 });
 
 chrome.runtime.onMessage.addListener((message, sender) => {
@@ -79,9 +79,21 @@ async function handleScreenshotRequest(selection, sender) {
   }
 }
 
-function openSidePanel(tabId) {
+async function openSidePanel(tabId) {
   if (chrome.sidePanel?.open) {
-    chrome.sidePanel.open({ tabId });
+    try {
+      await chrome.sidePanel.open({ tabId });
+      return;
+    } catch (error) {
+      console.warn("Background: sidePanel.open failed, fallback to floating panel", error);
+    }
+  }
+
+  const fallbackResult = await safeSendMessage(tabId, {
+    type: "OPEN_FLOATING_PANEL"
+  });
+
+  if (fallbackResult?.ok) {
     return;
   }
 
@@ -92,12 +104,13 @@ function openSidePanel(tabId) {
 
 function safeSendMessage(tabId, message) {
   if (tabId == null) {
-    return Promise.resolve();
+    return Promise.resolve(null);
   }
 
   return chrome.tabs
     .sendMessage(tabId, message)
     .catch(() => {
       // Ignore if the tab has no listener yet.
+      return null;
     });
 }

@@ -133,8 +133,14 @@ function requestScreenshot(selection) {
   });
 }
 
-chrome.runtime.onMessage.addListener((msg) => {
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   console.log("Content: runtime message", msg);
+  if (msg.type === "OPEN_FLOATING_PANEL") {
+    openFloatingSidebar();
+    sendResponse({ ok: true });
+    return;
+  }
+
   if (msg.type === "SCAN_IMAGE") {
     scanImageFromUrl(msg.url);
     return;
@@ -270,4 +276,157 @@ function startSelectionOverlay() {
   }, CANCEL_TIMEOUT);
 
   selectionState = state;
+}
+
+let floatingSidebarState = null;
+
+function openFloatingSidebar() {
+  if (!document.documentElement) {
+    return;
+  }
+
+  if (floatingSidebarState) {
+    setFloatingSidebarCollapsed(false);
+    return;
+  }
+
+  const host = document.createElement("div");
+  host.id = "qr-floating-sidebar-host";
+  const shadow = host.attachShadow({ mode: "open" });
+  const sidePanelUrl = chrome.runtime.getURL("sidepanel.html");
+
+  shadow.innerHTML = `
+    <style>
+      .wrapper {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        width: min(380px, calc(100vw - 24px));
+        height: calc(100vh - 32px);
+        z-index: 2147483000;
+        pointer-events: none;
+      }
+
+      .panel {
+        height: 100%;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.28);
+        border: 1px solid rgba(15, 23, 42, 0.14);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        pointer-events: auto;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 42px;
+        padding: 0 8px 0 12px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+        background: #f8fafc;
+        font: 500 13px/1 "Segoe UI", "PingFang SC", sans-serif;
+        color: #0f172a;
+      }
+
+      .actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 8px;
+        background: #e2e8f0;
+        color: #0f172a;
+        cursor: pointer;
+        font: 500 12px/1 "Segoe UI", "PingFang SC", sans-serif;
+        padding: 6px 10px;
+      }
+
+      .btn:hover {
+        background: #cbd5e1;
+      }
+
+      .frame {
+        flex: 1;
+        width: 100%;
+        border: 0;
+        background: #f8fafc;
+      }
+
+      .open-btn {
+        position: absolute;
+        right: 0;
+        top: 90px;
+        transform: rotate(-90deg) translateY(-100%);
+        transform-origin: right top;
+        border: none;
+        border-radius: 12px 12px 0 0;
+        background: #0f62fe;
+        color: #fff;
+        font: 500 13px/1 "Segoe UI", "PingFang SC", sans-serif;
+        padding: 10px 12px;
+        cursor: pointer;
+        pointer-events: auto;
+        box-shadow: 0 8px 20px rgba(15, 98, 254, 0.35);
+        display: none;
+      }
+
+      .wrapper.collapsed .panel {
+        display: none;
+      }
+
+      .wrapper.collapsed .open-btn {
+        display: inline-flex;
+      }
+    </style>
+    <div class="wrapper">
+      <section class="panel" aria-label="QR Floating Sidebar">
+        <div class="toolbar">
+          <span>二维码识别</span>
+          <div class="actions">
+            <button id="collapse-btn" class="btn" type="button">收起</button>
+            <button id="close-btn" class="btn" type="button">关闭</button>
+          </div>
+        </div>
+        <iframe class="frame" src="${sidePanelUrl}" title="QR Side Panel"></iframe>
+      </section>
+      <button id="open-btn" class="open-btn" type="button">打开扫码栏</button>
+    </div>
+  `;
+
+  const wrapper = shadow.querySelector(".wrapper");
+  const collapseBtn = shadow.getElementById("collapse-btn");
+  const closeBtn = shadow.getElementById("close-btn");
+  const openBtn = shadow.getElementById("open-btn");
+
+  if (!wrapper || !collapseBtn || !closeBtn || !openBtn) {
+    return;
+  }
+
+  collapseBtn.addEventListener("click", () => setFloatingSidebarCollapsed(true));
+  openBtn.addEventListener("click", () => setFloatingSidebarCollapsed(false));
+  closeBtn.addEventListener("click", () => {
+    if (floatingSidebarState?.host?.isConnected) {
+      floatingSidebarState.host.remove();
+    }
+    floatingSidebarState = null;
+  });
+
+  document.documentElement.appendChild(host);
+  floatingSidebarState = {
+    host,
+    wrapper
+  };
+}
+
+function setFloatingSidebarCollapsed(collapsed) {
+  if (!floatingSidebarState?.wrapper) {
+    return;
+  }
+  floatingSidebarState.wrapper.classList.toggle("collapsed", collapsed);
 }
