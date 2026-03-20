@@ -46,6 +46,8 @@
         "utils/qr-scanner.js",
         "utils/jsqr.js",
         "utils/jsqr-loader.js",
+        "utils/zxing.js",
+        "utils/zxing-loader.js",
         "sidepanel.html",
         "popup.html"
       ],
